@@ -1,0 +1,10 @@
+node_modules/
+.DS_Store
+*.log
+.env
+privkey
+testkey
+testkey.pub
+test-connection.js
+coverage/
+.claude/

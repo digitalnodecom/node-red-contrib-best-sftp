@@ -1,0 +1,209 @@
+<script type="text/javascript">
+    RED.nodes.registerType('sftp-best', {
+        category: 'storage',
+        color: '#4B8BBE',
+        defaults: {
+            name: { value: '' },
+            server: { value: '', type: 'sftp-config', required: true },
+            operation: { value: 'list' },
+            remotePath: { value: '/' },
+            localPath: { value: '' },
+            recursive: { value: false }
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: 'file.svg',
+        paletteLabel: 'SFTP',
+        label: function() {
+            if (this.name) {
+                return this.name;
+            }
+            var op = this.operation || 'list';
+            return 'sftp-best ' + op;
+        },
+        labelStyle: function() {
+            return this.name ? 'node_label_italic' : '';
+        },
+        oneditprepare: function() {
+            var node = this;
+
+            function updateVisibility() {
+                var op = $('#node-input-operation').val();
+
+                // Hide all optional rows first
+                $('.sftp-best-localpath-row').hide();
+                $('.sftp-best-recursive-row').hide();
+
+                // Show relevant fields based on operation
+                switch (op) {
+                    case 'get':
+                        $('.sftp-best-localpath-row').show();
+                        $('#localpath-label').text('Local Path (optional)');
+                        $('#localpath-help').text('Leave empty to return file as buffer');
+                        break;
+                    case 'put':
+                        $('.sftp-best-localpath-row').show();
+                        $('#localpath-label').text('Local Path');
+                        $('#localpath-help').text('Source file path, or send buffer in msg.payload');
+                        break;
+                    case 'rename':
+                        $('.sftp-best-localpath-row').show();
+                        $('#localpath-label').text('New Path');
+                        $('#localpath-help').text('New remote path/name');
+                        break;
+                    case 'mkdir':
+                    case 'rmdir':
+                        $('.sftp-best-recursive-row').show();
+                        break;
+                }
+            }
+
+            $('#node-input-operation').on('change', updateVisibility);
+            updateVisibility();
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="sftp-best">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-server"><i class="fa fa-server"></i> Server</label>
+        <input type="text" id="node-input-server">
+    </div>
+    <div class="form-row">
+        <label for="node-input-operation"><i class="fa fa-tasks"></i> Operation</label>
+        <select id="node-input-operation">
+            <option value="list">List Directory</option>
+            <option value="get">Download File</option>
+            <option value="put">Upload File</option>
+            <option value="delete">Delete File</option>
+            <option value="mkdir">Create Directory</option>
+            <option value="rmdir">Remove Directory</option>
+            <option value="rename">Rename/Move</option>
+            <option value="exists">Check Exists</option>
+            <option value="stat">Get File Info</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-remotePath"><i class="fa fa-folder-open"></i> Remote Path</label>
+        <input type="text" id="node-input-remotePath" placeholder="/">
+    </div>
+    <div class="form-row sftp-best-localpath-row">
+        <label for="node-input-localPath"><i class="fa fa-file"></i> <span id="localpath-label">Local Path</span></label>
+        <input type="text" id="node-input-localPath" placeholder="">
+        <div class="form-tips" id="localpath-help"></div>
+    </div>
+    <div class="form-row sftp-best-recursive-row">
+        <label for="node-input-recursive"><i class="fa fa-sitemap"></i> Recursive</label>
+        <input type="checkbox" id="node-input-recursive" style="width:auto; margin-left:0;">
+        <span style="margin-left:5px;">Create/remove subdirectories</span>
+    </div>
+</script>
+
+<script type="text/html" data-help-name="sftp-best">
+    <p>Performs SFTP operations on a remote server using ssh2-sftp-client.</p>
+
+    <h3>Operations</h3>
+    <dl class="message-properties">
+        <dt>list</dt>
+        <dd>Lists contents of a remote directory. Returns array of file objects.</dd>
+
+        <dt>get</dt>
+        <dd>Downloads a file. Returns file buffer or writes to local path.</dd>
+
+        <dt>put</dt>
+        <dd>Uploads a file from local path or msg.payload buffer.</dd>
+
+        <dt>delete</dt>
+        <dd>Deletes a remote file.</dd>
+
+        <dt>mkdir</dt>
+        <dd>Creates a remote directory. Use recursive for nested paths.</dd>
+
+        <dt>rmdir</dt>
+        <dd>Removes a remote directory. Use recursive to remove contents.</dd>
+
+        <dt>rename</dt>
+        <dd>Renames or moves a remote file/directory.</dd>
+
+        <dt>exists</dt>
+        <dd>Checks if path exists. Returns 'd' (dir), '-' (file), 'l' (link), or false.</dd>
+
+        <dt>stat</dt>
+        <dd>Gets file/directory statistics (size, permissions, times).</dd>
+    </dl>
+
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">string | buffer</span></dt>
+        <dd>For list/get/delete/exists/stat: remote path (overrides config).
+            For put: file content as buffer.</dd>
+
+        <dt class="optional">remotePath <span class="property-type">string</span></dt>
+        <dd>Override the remote path setting.</dd>
+
+        <dt class="optional">localPath <span class="property-type">string</span></dt>
+        <dd>Override the local path setting.</dd>
+
+        <dt class="optional">operation <span class="property-type">string</span></dt>
+        <dd>Override the operation type.</dd>
+
+        <dt class="optional">newPath <span class="property-type">string</span></dt>
+        <dd>For rename: the destination path.</dd>
+
+        <dt class="optional">recursive <span class="property-type">boolean</span></dt>
+        <dd>For mkdir/rmdir: create/remove subdirectories.</dd>
+    </dl>
+
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">varies</span></dt>
+        <dd>
+            <ul>
+                <li><b>list:</b> Array of file objects with name, type, size, modifyTime</li>
+                <li><b>get:</b> File buffer or {success, localPath}</li>
+                <li><b>put:</b> {success, remotePath}</li>
+                <li><b>delete:</b> {success, deleted}</li>
+                <li><b>mkdir:</b> {success, created}</li>
+                <li><b>rmdir:</b> {success, removed}</li>
+                <li><b>rename:</b> {success, from, to}</li>
+                <li><b>exists:</b> 'd', '-', 'l', or false</li>
+                <li><b>stat:</b> File statistics object</li>
+            </ul>
+        </dd>
+
+        <dt>sftp-best <span class="property-type">object</span></dt>
+        <dd>Metadata: operation, remotePath, host, port</dd>
+
+        <dt>exists <span class="property-type">boolean</span></dt>
+        <dd>For exists operation: true if path exists.</dd>
+    </dl>
+
+    <h3>Status</h3>
+    <p>The node shows connection and operation status:</p>
+    <ul>
+        <li><b>Yellow dot:</b> Connecting</li>
+        <li><b>Green dot:</b> Connected / Done</li>
+        <li><b>Blue dot:</b> Operation in progress</li>
+        <li><b>Red ring:</b> Error occurred</li>
+    </ul>
+
+    <h3>Example: List Directory</h3>
+    <pre>msg.payload = '/home/user/files';
+// or
+msg.remotePath = '/home/user/files';
+msg.operation = 'list';</pre>
+
+    <h3>Example: Download File</h3>
+    <pre>msg.remotePath = '/home/user/file.csv';
+msg.operation = 'get';
+// Returns file buffer in msg.payload</pre>
+
+    <h3>Example: Upload Buffer</h3>
+    <pre>msg.payload = Buffer.from('file content');
+msg.remotePath = '/home/user/newfile.txt';
+msg.operation = 'put';</pre>
+</script>

@@ -1,0 +1,10 @@
+test/
+coverage/
+.github/
+*.log
+.DS_Store
+privkey
+testkey*
+test-connection.js
+.claude/
+.gitignore

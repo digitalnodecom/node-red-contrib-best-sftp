@@ -1,0 +1,95 @@
+<script type="text/javascript">
+    RED.nodes.registerType('sftp-config', {
+        category: 'config',
+        defaults: {
+            name: { value: '' },
+            host: { value: '', required: true },
+            port: { value: 22, required: true, validate: RED.validators.number() },
+            tryKeyboard: { value: true }
+        },
+        credentials: {
+            username: { type: 'text' },
+            password: { type: 'password' },
+            privateKey: { type: 'password' },
+            passphrase: { type: 'password' }
+        },
+        label: function() {
+            if (this.name) {
+                return this.name;
+            }
+            var user = this.credentials && this.credentials.username ? this.credentials.username : 'user';
+            return user + '@' + (this.host || 'sftp-server') + ':' + (this.port || 22);
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="sftp-config">
+    <div class="form-row">
+        <label for="node-config-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-config-input-name" placeholder="Optional display name">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-host"><i class="fa fa-server"></i> Host</label>
+        <input type="text" id="node-config-input-host" placeholder="sftp.example.com">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-port"><i class="fa fa-hashtag"></i> Port</label>
+        <input type="number" id="node-config-input-port" placeholder="22">
+    </div>
+    <hr>
+    <div class="form-row">
+        <label for="node-config-input-username"><i class="fa fa-user"></i> Username</label>
+        <input type="text" id="node-config-input-username" placeholder="username">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-password"><i class="fa fa-lock"></i> Password</label>
+        <input type="password" id="node-config-input-password" placeholder="password">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-tryKeyboard"><i class="fa fa-keyboard-o"></i> Keyboard Auth</label>
+        <input type="checkbox" id="node-config-input-tryKeyboard" style="width:auto; margin-left:0;">
+        <span style="margin-left:5px;">Use keyboard-interactive authentication</span>
+    </div>
+    <hr>
+    <div class="form-row">
+        <label for="node-config-input-privateKey"><i class="fa fa-key"></i> Private Key</label>
+        <textarea id="node-config-input-privateKey" rows="4" style="width:70%" placeholder="-----BEGIN RSA PRIVATE KEY-----&#10;...&#10;-----END RSA PRIVATE KEY-----"></textarea>
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-passphrase"><i class="fa fa-shield"></i> Passphrase</label>
+        <input type="password" id="node-config-input-passphrase" placeholder="Key passphrase (if encrypted)">
+    </div>
+</script>
+
+<script type="text/html" data-help-name="sftp-config">
+    <p>Configuration node for SFTP server connection settings.</p>
+
+    <h3>Settings</h3>
+    <dl class="message-properties">
+        <dt>Host <span class="property-type">string</span></dt>
+        <dd>The SFTP server hostname or IP address.</dd>
+
+        <dt>Port <span class="property-type">number</span></dt>
+        <dd>The SFTP server port (default: 22).</dd>
+
+        <dt>Username <span class="property-type">string</span></dt>
+        <dd>The username for authentication.</dd>
+
+        <dt>Password <span class="property-type">string</span></dt>
+        <dd>The password for authentication. Used for password and keyboard-interactive auth.</dd>
+
+        <dt>Private Key <span class="property-type">string</span></dt>
+        <dd>Optional SSH private key for key-based authentication.</dd>
+
+        <dt>Passphrase <span class="property-type">string</span></dt>
+        <dd>Passphrase for encrypted private keys.</dd>
+    </dl>
+
+    <h3>Authentication</h3>
+    <p>This node supports multiple authentication methods:</p>
+    <ul>
+        <li><b>Password</b> - Standard password authentication</li>
+        <li><b>Keyboard-interactive</b> - Interactive authentication (uses password)</li>
+        <li><b>Public key</b> - SSH key-based authentication</li>
+    </ul>
+</script>
