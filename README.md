@@ -1,4 +1,4 @@
-# node-red-contrib-best-sftp
+# @digitalnodecom/node-red-contrib-best-sftp
 
 A reliable SFTP client node for Node-RED with keyboard-interactive authentication support.
 
@@ -17,14 +17,14 @@ A reliable SFTP client node for Node-RED with keyboard-interactive authenticatio
 
 1. Open Node-RED
 2. Go to Menu → Manage Palette → Install
-3. Search for `node-red-contrib-best-sftp`
+3. Search for `@digitalnodecom/node-red-contrib-best-sftp`
 4. Click Install
 
 ### Via npm
 
 ```bash
 cd ~/.node-red
-npm install node-red-contrib-best-sftp
+npm install @digitalnodecom/node-red-contrib-best-sftp
 ```
 
 Then restart Node-RED.
